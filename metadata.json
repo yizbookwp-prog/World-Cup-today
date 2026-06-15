@@ -1,0 +1,6 @@
+{
+  "name": "World Cup AI Predictor",
+  "description": "A high-conversion football prediction tool simulating AI logic to predict win probabilities, scorelines, and Asian handicaps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
