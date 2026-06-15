@@ -81,7 +81,7 @@ export default function App() {
             今日赛程数据终端
           </h1>
           <p className="text-slate-400 max-w-lg mx-auto text-sm md:text-base">
-            高精度足球赛果预测引擎。获取 AI 计算的胜平负概率、精确比分预测，或查看已经开始的真实赛事比分。
+            高精度足球赛果预测引擎。获取 AI 计算的输赢概率、精确比分预测，或查看已经开始的真实赛事比分。
           </p>
         </header>
 
@@ -186,13 +186,13 @@ export default function App() {
                        <Cpu className="w-6 h-6" />
                     </div>
                   </div>
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0.5 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
                     className="text-cyan-400 font-mono text-sm tracking-widest"
                   >
-                    正在解算多维赔率模型
+                    正在解算多维概率模型
                   </motion.div>
                 </motion.div>
              )}

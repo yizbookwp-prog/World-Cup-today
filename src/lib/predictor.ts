@@ -1,4 +1,85 @@
-import { Match, PredictionResult, Scoreline } from '../types';
+import { Match, PredictionResult, Scoreline, WorldCupHistory } from '../types';
+
+// Weights for different factors
+const WEIGHTS = {
+  baseStrength: 0.30,
+  fifaRanking: 0.25,
+  worldCupHistory: 0.20,
+  attackDefense: 0.15,
+  injuries: 0.10
+};
+
+// Calculate FIFA ranking score (1-100 scale)
+function fifaRankingToScore(ranking: number): number {
+  if (ranking <= 10) return 95 + (10 - ranking) * 0.5;
+  if (ranking <= 30) return 85 + (30 - ranking) * 0.5;
+  if (ranking <= 50) return 75 + (50 - ranking) * 0.5;
+  if (ranking <= 100) return 60 + (100 - ranking) * 0.3;
+  return Math.max(50, 60 - (ranking - 100) * 0.1);
+}
+
+// Calculate World Cup pedigree score (0-100 scale)
+function calculateWorldCupPedigree(history?: WorldCupHistory): number {
+  if (!history) return 50; // Default for teams without data
+
+  let score = 0;
+
+  // Appearances contribution (max 30 points)
+  score += Math.min(history.appearances * 2, 30);
+
+  // Titles contribution (max 40 points)
+  score += history.titles * 20;
+
+  // Best finish contribution (max 30 points)
+  const finishScores: Record<string, number> = {
+    '冠军': 30,
+    '亚军': 24,
+    '四强': 18,
+    '八强': 12,
+    '十六强': 6,
+    '小组赛': 3
+  };
+  score += finishScores[history.bestFinish] || 3;
+
+  return Math.min(score, 100);
+}
+
+// Calculate weighted strength combining all factors
+function calculateWeightedStrength(match: Match, isHome: boolean) {
+  const strength = isHome ? match.homeStrength : match.awayStrength;
+  const fifaRanking = isHome ? (match.homeFifaRanking || 50) : (match.awayFifaRanking || 50);
+  const worldCupHistory = isHome ? match.homeWorldCupHistory : match.awayWorldCupHistory;
+  const injuries = isHome ? (match.homeInjuries || 0) : (match.awayInjuries || 0);
+  const attackRating = isHome ? (match.homeAttackRating || strength) : (match.awayAttackRating || strength);
+  const defenseRating = isHome ? (match.homeDefenseRating || strength) : (match.awayDefenseRating || strength);
+
+  // Individual scores
+  const baseScore = strength;
+  const fifaScore = fifaRankingToScore(fifaRanking);
+  const wcScore = calculateWorldCupPedigree(worldCupHistory);
+  const attackDefenseScore = (attackRating + defenseRating) / 2;
+  const injuryPenalty = injuries * 3; // Each injury reduces score by 3 points
+
+  // Weighted calculation
+  const weightedScore =
+    (baseScore * WEIGHTS.baseStrength) +
+    (fifaScore * WEIGHTS.fifaRanking) +
+    (wcScore * WEIGHTS.worldCupHistory) +
+    (attackDefenseScore * WEIGHTS.attackDefense) -
+    (injuryPenalty * WEIGHTS.injuries);
+
+  return {
+    weightedScore: Math.max(0, Math.min(100, weightedScore)),
+    components: {
+      overallStrength: Math.round(baseScore),
+      attackEfficiency: Math.round(attackRating),
+      defenseStrength: Math.round(defenseRating),
+      fifaRanking: Math.round(fifaScore),
+      worldCupPedigree: Math.round(wcScore),
+      injuryImpact: Math.round(injuryPenalty)
+    }
+  };
+}
 
 export const sampleMatches: Match[] = [
   { id: '1', time: '19:30', league: '世界杯', homeTeam: '阿根廷', awayTeam: '法国', homeStrength: 89, awayStrength: 88, status: 0 },
@@ -9,7 +90,13 @@ export const sampleMatches: Match[] = [
   { id: '6', time: '08:00', league: '亚预赛', homeTeam: '日本', awayTeam: '韩国', homeStrength: 78, awayStrength: 76, status: 0 },
 ];
 
-function calculateProbabilities(homeStr: number, awayStr: number) {
+function calculateProbabilities(match: Match) {
+  const homeData = calculateWeightedStrength(match, true);
+  const awayData = calculateWeightedStrength(match, false);
+
+  const homeStr = homeData.weightedScore;
+  const awayStr = awayData.weightedScore;
+
   const diff = homeStr - awayStr;
   const homeAdvantage = 3; // Home team bump
   const adjustedDiff = diff + homeAdvantage;
@@ -21,7 +108,7 @@ function calculateProbabilities(homeStr: number, awayStr: number) {
   // Add slight random variation (-2 to 2)
   const rand1 = (Math.random() * 4) - 2;
   const rand2 = (Math.random() * 4) - 2;
-  
+
   homeProb += rand1;
   awayProb += rand2;
   drawProb = 100 - (homeProb + awayProb);
@@ -29,11 +116,15 @@ function calculateProbabilities(homeStr: number, awayStr: number) {
   // Bound checks
   if (homeProb < 5) { homeProb = 5; drawProb = 100 - (homeProb + awayProb); }
   if (awayProb < 5) { awayProb = 5; drawProb = 100 - (homeProb + awayProb); }
-  
+
   return {
-    home: Math.round(homeProb),
-    draw: Math.round(drawProb),
-    away: Math.round(awayProb)
+    probabilities: {
+      home: Math.round(homeProb),
+      draw: Math.round(drawProb),
+      away: Math.round(awayProb)
+    },
+    homeData,
+    awayData
   };
 }
 
@@ -99,11 +190,11 @@ function calculateHandicap(homeStr: number, awayStr: number) {
   const upsetRoll = Math.random() < 0.35; // 35% chance to predict the underdog covers
 
   if (isHomeFavorite) {
-    predictionStr = upsetRoll ? `${aName} 赢盘 (+${Math.abs(line)})` : `${hName} 胜`;
+    predictionStr = upsetRoll ? `${aName} 优势 (+${Math.abs(line)})` : `${hName} 胜`;
   } else if (line === 0) {
     predictionStr = upsetRoll ? '平局' : (Math.random() > 0.5 ? `${hName} 胜` : `${aName} 胜`);
   } else {
-    predictionStr = upsetRoll ? `${hName} 赢盘 (+${Math.abs(line)})` : `${aName} 胜`;
+    predictionStr = upsetRoll ? `${hName} 优势 (+${Math.abs(line)})` : `${aName} 胜`;
   }
 
   return {
@@ -114,9 +205,10 @@ function calculateHandicap(homeStr: number, awayStr: number) {
 }
 
 export function generatePrediction(match: Match): PredictionResult {
-  const probs = calculateProbabilities(match.homeStrength, match.awayStrength);
+  const calcResult = calculateProbabilities(match);
+  const probs = calcResult.probabilities;
   const scores = generateScores(match.homeStrength, match.awayStrength, probs);
-  
+
   let recommendedResult: '主胜' | '平局' | '客胜' = '主胜';
   if (probs.away > probs.home && probs.away > probs.draw) recommendedResult = '客胜';
   if (probs.draw > probs.home && probs.draw > probs.away) recommendedResult = '平局';
@@ -133,6 +225,17 @@ export function generatePrediction(match: Match): PredictionResult {
     winProbabilities: probs,
     recommendedResult,
     scorePredictions: scores,
-    asianHandicap: handicapResult
+    asianHandicap: handicapResult,
+    dataAnalysis: {
+      homeTeam: calcResult.homeData.components,
+      awayTeam: calcResult.awayData.components,
+      weights: {
+        baseStrength: Math.round(WEIGHTS.baseStrength * 100),
+        fifaRanking: Math.round(WEIGHTS.fifaRanking * 100),
+        worldCupHistory: Math.round(WEIGHTS.worldCupHistory * 100),
+        attackDefense: Math.round(WEIGHTS.attackDefense * 100),
+        injuries: Math.round(WEIGHTS.injuries * 100)
+      }
+    }
   };
 }

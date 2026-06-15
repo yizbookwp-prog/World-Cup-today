@@ -1,3 +1,9 @@
+export interface WorldCupHistory {
+  appearances: number;
+  titles: number;
+  bestFinish: string;
+}
+
 export interface Match {
   id: string;
   time: string;
@@ -11,6 +17,16 @@ export interface Match {
   status: number; // 0: finished, 1: upcoming, 3: live
   homeScore?: number | null;
   awayScore?: number | null;
+  homeFifaRanking?: number;
+  awayFifaRanking?: number;
+  homeWorldCupHistory?: WorldCupHistory;
+  awayWorldCupHistory?: WorldCupHistory;
+  homeInjuries?: number;
+  awayInjuries?: number;
+  homeAttackRating?: number;
+  awayAttackRating?: number;
+  homeDefenseRating?: number;
+  awayDefenseRating?: number;
 }
 
 export interface Scoreline {
@@ -32,5 +48,30 @@ export interface PredictionResult {
     line: string;
     prediction: string;
     stars: number;
+  };
+  dataAnalysis: {
+    homeTeam: {
+      overallStrength: number;
+      attackEfficiency: number;
+      defenseStrength: number;
+      fifaRanking: number;
+      worldCupPedigree: number;
+      injuryImpact: number;
+    };
+    awayTeam: {
+      overallStrength: number;
+      attackEfficiency: number;
+      defenseStrength: number;
+      fifaRanking: number;
+      worldCupPedigree: number;
+      injuryImpact: number;
+    };
+    weights: {
+      baseStrength: number;
+      fifaRanking: number;
+      worldCupHistory: number;
+      attackDefense: number;
+      injuries: number;
+    };
   };
 }

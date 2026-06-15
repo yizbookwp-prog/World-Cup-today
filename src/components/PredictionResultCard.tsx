@@ -1,7 +1,7 @@
 import React from 'react';
 import { PredictionResult, Match } from '../types';
 import { motion } from 'motion/react';
-import { Target, TrendingUp, Star, Percent } from 'lucide-react';
+import { Target, TrendingUp, Star, Percent, Database } from 'lucide-react';
 
 export const PredictionResultCard: React.FC<{ result: PredictionResult, match: Match }> = ({ result, match }) => {
   
@@ -48,7 +48,7 @@ export const PredictionResultCard: React.FC<{ result: PredictionResult, match: M
           <div className="p-2 bg-emerald-500/20 rounded-lg">
             <Percent className="w-5 h-5 text-emerald-400" />
           </div>
-          <h3 className="text-xl font-display font-semibold">胜平负概率</h3>
+          <h3 className="text-xl font-display font-semibold">比赛结果概率</h3>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-6 text-center">
@@ -81,7 +81,7 @@ export const PredictionResultCard: React.FC<{ result: PredictionResult, match: M
           <div className="p-2 bg-blue-500/20 rounded-lg">
             <Target className="w-5 h-5 text-blue-400" />
           </div>
-          <h3 className="text-xl font-display font-semibold">波胆比分预测</h3>
+          <h3 className="text-xl font-display font-semibold">精确比分预测</h3>
         </div>
 
         <div className="space-y-3">
@@ -111,19 +111,19 @@ export const PredictionResultCard: React.FC<{ result: PredictionResult, match: M
         </div>
       </div>
 
-      {/* Asian Handicap */}
+      {/* Handicap Analysis */}
       <div className="glass rounded-2xl p-6 relative overflow-hidden">
          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-pink-400"></div>
          <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-purple-500/20 rounded-lg">
             <TrendingUp className="w-5 h-5 text-purple-400" />
           </div>
-          <h3 className="text-xl font-display font-semibold">亚盘深度分析</h3>
+          <h3 className="text-xl font-display font-semibold">优势差距分析</h3>
         </div>
 
         <div className="flex flex-col md:flex-row items-center gap-4">
            <div className="w-full md:w-1/3 p-4 bg-white/5 rounded-xl border border-white/10 text-center">
-             <div className="text-sm text-slate-400 mb-1">系统预设盘口</div>
+             <div className="text-sm text-slate-400 mb-1">分析基准线</div>
              <div className="text-xl font-bold text-slate-200 mt-2">
                 主队 {result.asianHandicap.line}
              </div>
@@ -140,6 +140,180 @@ export const PredictionResultCard: React.FC<{ result: PredictionResult, match: M
                 {result.asianHandicap.prediction}
               </div>
            </div>
+        </div>
+      </div>
+
+      {/* Data Source Analysis */}
+      <div className="glass rounded-2xl p-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-400 to-violet-400"></div>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-indigo-500/20 rounded-lg">
+            <Database className="w-5 h-5 text-indigo-400" />
+          </div>
+          <h3 className="text-xl font-display font-semibold">数据来源分析</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Home Team Data */}
+          <div className="space-y-3">
+            <div className="text-center mb-4">
+              <span className="text-lg font-semibold text-slate-200">{homeTeam}</span>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">综合实力</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.homeTeam.overallStrength}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.homeTeam.overallStrength}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">进攻效率</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.homeTeam.attackEfficiency}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.homeTeam.attackEfficiency}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">防守强度</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.homeTeam.defenseStrength}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.homeTeam.defenseStrength}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">FIFA 排名</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.homeTeam.fifaRanking}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.homeTeam.fifaRanking}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">世界杯底蕴</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.homeTeam.worldCupPedigree}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-amber-500 to-yellow-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.homeTeam.worldCupPedigree}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">伤病影响</span>
+                <span className="text-rose-400 font-medium">-{result.dataAnalysis.homeTeam.injuryImpact}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-rose-500 to-red-600 h-2 rounded-full" style={{width: `${Math.min(result.dataAnalysis.homeTeam.injuryImpact * 6.67, 100)}%`}}></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Away Team Data */}
+          <div className="space-y-3">
+            <div className="text-center mb-4">
+              <span className="text-lg font-semibold text-slate-200">{awayTeam}</span>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">综合实力</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.awayTeam.overallStrength}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-emerald-500 to-cyan-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.awayTeam.overallStrength}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">进攻效率</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.awayTeam.attackEfficiency}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.awayTeam.attackEfficiency}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">防守强度</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.awayTeam.defenseStrength}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.awayTeam.defenseStrength}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">FIFA 排名</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.awayTeam.fifaRanking}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.awayTeam.fifaRanking}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">世界杯底蕴</span>
+                <span className="text-slate-200 font-medium">{result.dataAnalysis.awayTeam.worldCupPedigree}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-amber-500 to-yellow-500 h-2 rounded-full" style={{width: `${result.dataAnalysis.awayTeam.worldCupPedigree}%`}}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-400">伤病影响</span>
+                <span className="text-rose-400 font-medium">-{result.dataAnalysis.awayTeam.injuryImpact}</span>
+              </div>
+              <div className="w-full bg-slate-800/50 rounded-full h-2">
+                <div className="bg-gradient-to-r from-rose-500 to-red-600 h-2 rounded-full" style={{width: `${Math.min(result.dataAnalysis.awayTeam.injuryImpact * 6.67, 100)}%`}}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Weights Explanation */}
+        <div className="pt-4 border-t border-white/10">
+          <div className="text-xs text-slate-400 mb-2">算法权重配比：</div>
+          <div className="flex flex-wrap gap-3 text-xs">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+              <span className="text-slate-300">基础实力 {result.dataAnalysis.weights.baseStrength}%</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+              <span className="text-slate-300">FIFA排名 {result.dataAnalysis.weights.fifaRanking}%</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+              <span className="text-slate-300">世界杯历史 {result.dataAnalysis.weights.worldCupHistory}%</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+              <span className="text-slate-300">攻防能力 {result.dataAnalysis.weights.attackDefense}%</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+              <span className="text-slate-300">伤病因素 {result.dataAnalysis.weights.injuries}%</span>
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>
